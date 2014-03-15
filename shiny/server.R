@@ -89,7 +89,8 @@ shinyServer(function(input, output) {
                                  label=get(labels()[2]), trans=Trans(),
                                  limits=range_variable()) +
               scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
-                                    label=get(labels()[1]), trans=Trans()) +
+                                    label=get(labels()[1]), trans=Trans(),
+                                    limits=range_variable()) +
               theme_grey(base_family=MyFont)  +
               ExtraCoords +
               ggtitle(input$Variable)
@@ -105,10 +106,13 @@ shinyServer(function(input, output) {
       geom_point(aes(size=x)) +
       geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
       labs(y="") +
-      scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans()) +
+      scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans(),
+                         limits=range_variable()) +
       scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
-                            label=get(labels()[1]), trans=Trans()) +
-      scale_size_continuous(input$variablex, label=get(labels()[1]), trans=Trans()) +
+                            label=get(labels()[1]), trans=Trans(),
+                            limits=range_variable()) +
+      scale_size_continuous(input$variablex, label=get(labels()[1]), trans=Trans(),
+                            limits=range_variable()) +
       theme_grey(base_family=MyFont) +
       theme(legend.position="none") +
       ggtitle(input$Variable)

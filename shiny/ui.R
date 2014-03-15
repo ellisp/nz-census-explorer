@@ -44,15 +44,17 @@ shinyUI(pageWithSidebar(
                   selected="Maori"), 
     
      
+    checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE),
+    checkboxInput("logs", "Logarithmic scale", FALSE),
     
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",
     
-      checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE),
+      
       checkboxInput("equality", "Show equality line", TRUE),
       checkboxInput("regression", "Show regression line", FALSE)    
-    ), 
-    checkboxInput("logs", "Logarithmic scale", FALSE)
+    )
+    
     ),
   
   #===================Draw main panel================

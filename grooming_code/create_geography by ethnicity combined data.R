@@ -1,7 +1,11 @@
 #=============preliminary material=============
+# Note - there are problems running this script by source(), to do with the encoding of Mäori.
+
 rm(list=ls())
 library(census2013)
 source("grooming_code/add year variable to tables from census library.R")
+
+
 
 
 
@@ -80,10 +84,14 @@ Educ_T1_all <- rbind(C01Education_T1, C06Education_T1, CEducation_T1)
 Educ_T1_all$Ethnicity <- rename.levels(Educ_T1_all$Ethnicity, orig="Mäori", new="Maori")
 Educ_T1_all <- Educ_T1_all[Educ_T1_all$Age_Group == "Total", ]
 
+levels(Educ_T1_all$Level_of_education)
+
 tmp <- ddply(Educ_T1_all, .(Geography_Type, Geography, Year, Ethnicity), summarise, 
              Proportion_with_no_education = sum(Total_People[Level_of_education == "None"]) / 
                sum(Total_People[Level_of_education == "Total"]) * 100,
-             Proportion_with_higher_education = sum(Total_People[Level_of_education == "Level 7/Bachelors and above"]) / 
+             Proportion_with_higher_education = sum(Total_People[Level_of_education %in% c(
+               "Level 7/Bachelors and above", "L7/Bachelors and above", "L7/Bachelor and above")
+                                                                 ]) / 
                sum(Total_People[Level_of_education == "Total"]) * 100
              )
 
