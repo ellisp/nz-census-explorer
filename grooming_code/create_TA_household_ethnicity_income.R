@@ -1,12 +1,10 @@
-
+#=============preliminary material=============
 library(census2013)
-
-C01Income_T4$Year <- 2001
-C06Income_T4$Year <- 2006
-Cincome_T4$Year <- 2013
+source("grooming_code/add year variable to tables from census library.R")
 
 
 Income_T4_all <- rbind(C01Income_T4, C06Income_T4, Cincome_T4)
+
 
 Income_T4_all$Ethnicity <- rename.levels(Income_T4_all$Ethnicity, orig="Mäori", new="Maori")
 # Income_T4_all$Variable <- 
@@ -24,7 +22,7 @@ Income_T4_all_c <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethn
 
 
 
-#==============processing of census_combined
+#==============processing of census_combined dataset====================
 census_combined <- subset(Income_T4_all_c, Geography_Type %in% c("TA", "Region"))
 
 names(census_combined)[names(census_combined) == "Geography"] <- "NAME"
