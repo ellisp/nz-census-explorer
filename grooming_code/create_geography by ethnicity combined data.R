@@ -12,6 +12,7 @@ combined_cast_tabs <- list()
 
 #-----------2 variables from Income_T4_all---------------
 Income_T4_all <- rbind(C01Income_T4, C06Income_T4, Cincome_T4)
+levels(Income_T4_all$Ethnicity)
 Income_T4_all$Ethnicity <- rename.levels(Income_T4_all$Ethnicity, orig="Mäori", new="Maori")
 
 target <- "Median_Household_Income_Dollars"
@@ -76,24 +77,23 @@ combined_cast_tabs[[6]]$variable <- target
 #---------------------------2 from Education_T1---------------
 
 Educ_T1_all <- rbind(C01Education_T1, C06Education_T1, CEducation_T1)
-
 Educ_T1_all$Ethnicity <- rename.levels(Educ_T1_all$Ethnicity, orig="Mäori", new="Maori")
 Educ_T1_all <- Educ_T1_all[Educ_T1_all$Age_Group == "Total", ]
 
 tmp <- ddply(Educ_T1_all, .(Geography_Type, Geography, Year, Ethnicity), summarise, 
-             Percent_with_no_education = sum(Total_People[Level_of_education == "None"]) / 
+             Proportion_with_no_education = sum(Total_People[Level_of_education == "None"]) / 
                sum(Total_People[Level_of_education == "Total"]) * 100,
-             Percent_with_higher_education = sum(Total_People[Level_of_education == "Level 7/Bachelors and above"]) / 
+             Proportion_with_higher_education = sum(Total_People[Level_of_education == "Level 7/Bachelors and above"]) / 
                sum(Total_People[Level_of_education == "Total"]) * 100
              )
 
-target <- "Percent_with_no_education"
+target <- "Proportion_with_no_education"
 combined_cast_tabs[[7]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnicity, 
                                  function(x){mean(x, na.rm=TRUE)}, 
                                  value.var = target)
 combined_cast_tabs[[7]]$variable <- target
 
-target <- "Percent_with_higher_education"
+target <- "Proportion_with_higher_education"
 combined_cast_tabs[[8]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnicity, 
                                  function(x){mean(x, na.rm=TRUE)}, 
                                  value.var = target)
@@ -129,14 +129,27 @@ variables <- data.frame(name=unique(census_combined$variable))
 variables$name <- as.character(variables$name)
 variables$label <- "comma"                        
 variables$label[grep("ercent", variables$name)] <- "percent"
+variables$label[grep("roportion", variables$name)] <- "percent"
 variables$label[grep("ollars", variables$name)] <- "dollar"
+
+
+
 
 census_combined[census_combined$variable %in% variables$name[variables$label =="percent"] , ethnicities] <-
   census_combined[census_combined$variable %in% variables$name[variables$label =="percent"] , ethnicities] / 100
-  
+
+census_combined_m <- melt(census_combined[, c("variable", ethnicities)],
+                          id.vars="variable", variable.name="Ethnicity")
+
+ranges <- ddply(census_combined_m, .(variable), summarise,
+                Min = min(value, na.rm=TRUE),
+                Max = max(value, na.rm=TRUE))
+variables <- merge(variables, ranges, by.x="name", by.y="variable")
+
+
 
 save(census_combined, file = "shiny/census_combined.rda")
 save(ethnicities, file="shiny/ethnicities.rda")
 save(variables, file="shiny/variables.rda")
 
-
+# summary(subset(census_combined, variable=="Proportion with higher education"))

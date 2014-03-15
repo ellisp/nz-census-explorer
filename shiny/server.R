@@ -9,7 +9,7 @@ load("census_combined.rda")
 load("variables.rda")
 
 # For debugging
-# input <- data.frame(variablex="Maori", variabley="Maori", "GeoType" = "Territorial Authority")
+# input <- data.frame(variablex="Maori", variabley="Maori", "GeoType" = "Territorial Authority", Variable = "Total People")
 
 # TODO - fix labels on scales (comma, dollar, percent, etc)
 
@@ -43,8 +43,23 @@ shinyServer(function(input, output) {
     }
   })
   
+  range_variable <- reactive({
+    if(input$EqualCoords){
+      rv <- c(variables[variables$name == input$Variable, "Min"], variables[variables$name == input$Variable, "Max"])
+      if(input$logs){
+        rv[1] <- rv[2] / 100 # otherwise it is zero and crashes the programme
+      }
+    } else{
+      rv <- NULL
+    }
+      return(rv)
+  })
+  
+  
+  
   #--------------------Define scatter plot-----------------------------
   output$motion <- renderPlot({
+    
     if(input$regression){
       ExtraLine1 <- geom_smooth(method="lm")
     } else{
@@ -67,8 +82,12 @@ shinyServer(function(input, output) {
               ExtraLine1 + 
               ExtraLine2 +
               geom_text(family="Comic Sans MS") +
-              scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans()) +
-              scale_y_continuous(paste0(input$variabley, "\n"), label=get(labels()[2]), trans=Trans()) +
+              scale_x_continuous(paste0("\n", input$variablex), 
+                                 label=get(labels()[1]), trans=Trans(),
+                                 limits=range_variable()) +
+              scale_y_continuous(paste0(input$variabley, "\n"), 
+                                 label=get(labels()[2]), trans=Trans(),
+                                 limits=range_variable()) +
               scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
                                     label=get(labels()[1]), trans=Trans()) +
               theme_grey(base_family=MyFont)  +

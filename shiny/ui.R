@@ -48,7 +48,7 @@ shinyUI(pageWithSidebar(
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",
     
-      checkboxInput("EqualCoords", "Force both scales to be equal", FALSE),
+      checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE),
       checkboxInput("equality", "Show equality line", TRUE),
       checkboxInput("regression", "Show regression line", FALSE)    
     ), 
