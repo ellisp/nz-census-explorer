@@ -70,10 +70,12 @@ census_combined$NAME <- gsub(" Region", "", census_combined$NAME)
 census_combined$Geography_Type <- rename.levels(census_combined$Geography_Type,
                                                 orig = c("TA", "Region"),
                                                 ne = c("Territorial Authority", "Regional Council"))
+census_combined$NAME <- factor(census_combined$NAME)
+census_combined$variable <- factor(gsub("_", " ", census_combined$variable, fixed=TRUE))
 
 ethnicities <- names(census_combined)[ !names(census_combined) 
                                        %in% c("NAME", "Year", "variable", "Geography_Type")]
-variables <- unique(census_combined$variable)
+variables <- as.character(unique(census_combined$variable))
 save(census_combined, file = "shiny/census_combined.rda")
 save(ethnicities, file="shiny/ethnicities.rda")
 save(variables, file="shiny/variables.rda")
