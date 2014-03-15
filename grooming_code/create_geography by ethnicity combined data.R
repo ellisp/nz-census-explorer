@@ -3,18 +3,20 @@ library(census2013)
 source("grooming_code/add year variable to tables from census library.R")
 
 
+
+combined_cast_tabs <- list()
+
+#================create a range of combined variables
 Income_T4_all <- rbind(C01Income_T4, C06Income_T4, Cincome_T4)
-
-
 Income_T4_all$Ethnicity <- rename.levels(Income_T4_all$Ethnicity, orig="Mäori", new="Maori")
-# Income_T4_all$Variable <- 
 
 
 
-Income_T4_all_c <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethnicity, 
+target <- "Median_Household_Income_Dollars"
+combined_cast_tabs[[1]] <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethnicity, 
                          function(x){mean(x, na.rm=TRUE)}, 
-                         value.var = "Median_Household_Income_Dollars")
-
+                         value.var = target)
+combined_cast_tabs[[1]]$variable <- target
 
 
 
@@ -23,7 +25,7 @@ Income_T4_all_c <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethn
 
 
 #==============processing of census_combined dataset====================
-census_combined <- subset(Income_T4_all_c, Geography_Type %in% c("TA", "Region"))
+census_combined <- subset(combined_cast_tabs[[1]], Geography_Type %in% c("TA", "Region"))
 
 names(census_combined)[names(census_combined) == "Geography"] <- "NAME"
 census_combined <- census_combined[ -grep("Area Outside", census_combined$NAME), ]
@@ -39,11 +41,11 @@ census_combined$Geography_Type <- rename.levels(census_combined$Geography_Type,
                                                 orig = c("TA", "Region"),
                                                 ne = c("Territorial Authority", "Regional Council"))
 
-
-
-ethnicities <- names(census_combined)[-(1:3)]
-
+ethnicities <- names(census_combined)[ !names(census_combined) 
+                                       %in% c("NAME", "Year", "variable", "Geography_Type")]
+variables <- unique(census_combined$variable)
 save(census_combined, file = "shiny/census_combined.rda")
 save(ethnicities, file="shiny/ethnicities.rda")
+save(variables, file="shiny/variables.rda")
 
 
