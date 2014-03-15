@@ -7,10 +7,11 @@ source("grooming_code/add year variable to tables from census library.R")
 combined_cast_tabs <- list()
 
 #================create a range of combined variables
+
+
+#-----------Income_T4_all---------------
 Income_T4_all <- rbind(C01Income_T4, C06Income_T4, Cincome_T4)
 Income_T4_all$Ethnicity <- rename.levels(Income_T4_all$Ethnicity, orig="Mäori", new="Maori")
-
-
 
 target <- "Median_Household_Income_Dollars"
 combined_cast_tabs[[1]] <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethnicity, 
@@ -18,6 +19,11 @@ combined_cast_tabs[[1]] <- dcast(Income_T4_all, Geography_Type + Geography + Yea
                          value.var = target)
 combined_cast_tabs[[1]]$variable <- target
 
+target <- "Total_People"
+combined_cast_tabs[[2]] <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[2]]$variable <- target
 
 
 
@@ -25,7 +31,9 @@ combined_cast_tabs[[1]]$variable <- target
 
 
 #==============processing of census_combined dataset====================
-census_combined <- subset(combined_cast_tabs[[1]], Geography_Type %in% c("TA", "Region"))
+
+combined_cast_tabs <- do.call("rbind", combined_cast_tabs)
+census_combined <- subset(combined_cast_tabs, Geography_Type %in% c("TA", "Region"))
 
 names(census_combined)[names(census_combined) == "Geography"] <- "NAME"
 census_combined <- census_combined[ -grep("Area Outside", census_combined$NAME), ]

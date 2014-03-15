@@ -10,19 +10,23 @@ load("census_combined.rda")
 # For debugging
 # input <- data.frame(variablex=="Maori", variabley="Maori", "GeoType" = "Territorial Authority")
 
+# TODO - fix labels on scales (comma, dollar, percent, etc)
+
 #===================begin shinyServer()===============================
 shinyServer(function(input, output) {
   
   
   #----------------------define datasetInput-----------------------
   datasetInput <- reactive({
-    tmp <- census_combined[ , c("NAME", "Year", "Geography_Type",
+    tmp <- census_combined[ , c("NAME", "Year", "Geography_Type", "variable",
                                 as.character(input$variablex), 
                                 as.character(input$variabley), 
                                 as.character(input$variablex),
                                 as.character(input$variabley))]
-    names(tmp) <- c("NAME", "Year", "Geography_Type", "x", "y", "colour", "size")
-    tmp <- subset(tmp, Year==input$Year & Geography_Type == input$GeoType)
+    names(tmp) <- c("NAME", "Year", "Geography_Type", "variable", "x", "y", "colour", "size")
+    tmp <- subset(tmp, Year==input$Year & 
+                    Geography_Type == input$GeoType &
+                    variable == input$Variable)
     tmp$NAME <- with(tmp, factor(NAME, levels=NAME[order(x)]))
     return(tmp)
   })
@@ -41,20 +45,23 @@ shinyServer(function(input, output) {
       ExtraLine2 <- NULL
     } 
     
+    if(input$EqualCoords){
+      ExtraCoords <- coord_equal() 
+    } else{
+      ExtraCoords <- NULL
+    } 
     
       p <- ggplot(datasetInput(), aes(x=x, y=y, size=size, colour=colour, label=NAME)) +
               ExtraLine1 + 
               ExtraLine2 +
               geom_text(family="Comic Sans MS") +
-              scale_x_continuous(input$variablex, label=dollar, limits=input$xRange) +
-              scale_y_continuous(input$variabley, label=dollar, limits=input$yRange) +
+              scale_x_continuous(input$variablex, label=dollar) +
+              scale_y_continuous(input$variabley, label=dollar) +
               scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
-                                    label=dollar, breaks=
-                                      round(seq(input$xRange[2], input$xRange[1], length.out=10), -4)) +
-              scale_size_continuous(input$variabley, label=dollar, breaks=
-                                      round(seq(input$yRange[2], input$yRange[1], length.out=10), -4)) +
+                                    label=dollar) +
+              scale_size_continuous(input$variabley, label=dollar) +
               theme_grey(base_family=MyFont)  +
-              coord_equal() +
+              ExtraCoords +
               guides(colour = guide_legend(order = 2), 
                   size = guide_legend(order = 1))
                 
@@ -69,7 +76,7 @@ shinyServer(function(input, output) {
       geom_point(aes(size=x)) +
       geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
       labs(y="") +
-      scale_x_continuous(input$variablex, label=dollar, limits=input$xRange) +
+      scale_x_continuous(input$variablex, label=dollar) +
       scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), label=dollar) +
       scale_size_continuous(input$variablex, label=dollar) +
       theme_grey(base_family=MyFont) +

@@ -3,6 +3,7 @@ library(election2011)
 
 
 load("ethnicities.rda")
+load("variables.rda")
 
 # Define UI 
 shinyUI(pageWithSidebar(
@@ -23,39 +24,32 @@ shinyUI(pageWithSidebar(
                 choices=list("Territorial Authority", "Regional Council"),
                 selected="Territorial Authority"),
     
+    selectInput("Variable", "Census variable:",
+                choices=as.list(variables),
+                selected=variables[1]),
+    
     HTML("<hr>"),
     
     #-----------------------conditional options------------------------
     conditionalPanel(
-      condition = "input.theTabs === 'Scatter plot'",
-      selectInput("variabley", "Vertical axis and size (scatter plot only):",
+      condition = "input.theTabs != 'Barchart'",
+      selectInput("variabley", "Vertical axis and size:",
                 choices=as.list(ethnicities),
-                selected="European"), 
+                selected="European")
+      ), 
     
-    sliderInput("yRange", "Vertical axis range:",
-                min = 0, max = 200000, value = c(20000,135000))
-    ),
-    
-    
+        
     selectInput("variablex", "Horizontal axis and colour:",
                   choices=as.list(ethnicities),
                   selected="Maori"), 
     
-    conditionalPanel(
-      condition = "input.theTabs != 'Data table'",
-      
-      sliderInput("xRange", "Horizontal axis range:",
-                  min = 0, max = 200000, value = c(20000,135000)),
-        
-       br()
-    ),        
-    
+     
     
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",
     
+      checkboxInput("EqualCoords", "Force both scales to be equal?", TRUE),
       checkboxInput("equality", "Show equality line", TRUE),
-      
       checkboxInput("regression", "Show regression line", FALSE)    
     )    
     ),
