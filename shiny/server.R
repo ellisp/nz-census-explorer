@@ -5,7 +5,10 @@ library(RColorBrewer)
 library(extrafont)
 
 MyFont <- "Verdana"    
-load("IncomeTA_median.rda")
+load("census_combined.rda")
+
+# For debugging
+# input <- data.frame(variablex=="Maori", variabley="Maori", "GeoType" = "Territorial Authority")
 
 #===================begin shinyServer()===============================
 shinyServer(function(input, output) {
@@ -13,15 +16,14 @@ shinyServer(function(input, output) {
   
   #----------------------define datasetInput-----------------------
   datasetInput <- reactive({
-    tmp <- IncomeTA_median[ , c("NAME", "Year",
+    tmp <- census_combined[ , c("NAME", "Year", "Geography_Type",
                                 as.character(input$variablex), 
                                 as.character(input$variabley), 
                                 as.character(input$variablex),
                                 as.character(input$variabley))]
-    names(tmp) <- c("TA", "Year", "x", "y", "colour", "size")
-    tmp <- subset(tmp, Year==input$Year & 
-                    TA != "Area Outside Territorial Authority")
-    tmp$TA <- with(tmp, factor(TA, levels=TA[order(x)]))
+    names(tmp) <- c("NAME", "Year", "Geography_Type", "x", "y", "colour", "size")
+    tmp <- subset(tmp, Year==input$Year & Geography_Type == input$GeoType)
+    tmp$NAME <- with(tmp, factor(NAME, levels=NAME[order(x)]))
     return(tmp)
   })
   
@@ -40,7 +42,7 @@ shinyServer(function(input, output) {
     } 
     
     
-      p <- ggplot(datasetInput(), aes(x=x, y=y, size=size, colour=colour, label=TA)) +
+      p <- ggplot(datasetInput(), aes(x=x, y=y, size=size, colour=colour, label=NAME)) +
               ExtraLine1 + 
               ExtraLine2 +
               geom_text(family="Comic Sans MS") +
@@ -63,9 +65,9 @@ shinyServer(function(input, output) {
   #-------------------Define "bar" plot ------------------
   output$bar <- renderPlot({
     
-    p <- ggplot(datasetInput(), aes(y=TA, x=x, colour=x)) +
+    p <- ggplot(datasetInput(), aes(y=NAME, x=x, colour=x)) +
       geom_point(aes(size=x)) +
-      geom_segment(aes(yend=as.numeric(TA), y=as.numeric(TA)), xend=0) +
+      geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
       labs(y="") +
       scale_x_continuous(input$variablex, label=dollar, limits=input$xRange) +
       scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), label=dollar) +
@@ -80,7 +82,7 @@ shinyServer(function(input, output) {
   #-------------------Define data table----------------------
   
   output$Data <- renderDataTable({
-    tmp <- datasetInput()[ , c("TA", "Year", "x", "y")]
+    tmp <- datasetInput()[ , c("NAME", "Year", "x", "y")]
     tmp$x <- format(tmp$x, big.mark=",")
     tmp$y <- format(tmp$y, big.mark=",")
     names(tmp)[3:4] <- c(input$variablex, input$variabley)

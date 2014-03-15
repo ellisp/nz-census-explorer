@@ -1,24 +1,31 @@
 library(shiny)
 library(election2011)
 
-load("IncomeTA_median.rda")
-ethnicities <- names(IncomeTA_median)[-(1:2)]
+
+load("ethnicities.rda")
 
 # Define UI 
 shinyUI(pageWithSidebar(
   
-  # Application title
+    # Application title
   headerPanel("New Zealand median houshold income by ethnicity and district"),
   
+  #===============================Draw side panel================
   sidebarPanel(
     
     h3('Data options:'),
     
+    #----------------------options that apply to all-------------------------
     radioButtons("Year", "Census year:",
                  c(2013, 2006, 2001)),
     
-    br(),
+    selectInput("GeoType", "Geographical area type:",
+                choices=list("Territorial Authority", "Regional Council"),
+                selected="Territorial Authority"),
     
+    HTML("<hr>"),
+    
+    #-----------------------conditional options------------------------
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",
       selectInput("variabley", "Vertical axis and size (scatter plot only):",
@@ -52,7 +59,8 @@ shinyUI(pageWithSidebar(
       checkboxInput("regression", "Show regression line", FALSE)    
     )    
     ),
-    
+  
+  #===================Draw main panel================
   mainPanel(
     tabsetPanel(id="theTabs",
                 tabPanel("Scatter plot", plotOutput("motion", height="700px")), 
