@@ -25,8 +25,8 @@ shinyUI(pageWithSidebar(
                 selected="Territorial Authority"),
     
     selectInput("Variable", "Census variable:",
-                choices=as.list(variables),
-                selected=variables[1]),
+                choices=as.list(variables$name),
+                selected=variables$name[1]),
     
     HTML("<hr>"),
     

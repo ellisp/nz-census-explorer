@@ -6,9 +6,10 @@ library(extrafont)
 
 MyFont <- "Verdana"    
 load("census_combined.rda")
+load("variables.rda")
 
 # For debugging
-# input <- data.frame(variablex=="Maori", variabley="Maori", "GeoType" = "Territorial Authority")
+# input <- data.frame(variablex="Maori", variabley="Maori", "GeoType" = "Territorial Authority")
 
 # TODO - fix labels on scales (comma, dollar, percent, etc)
 
@@ -16,7 +17,7 @@ load("census_combined.rda")
 shinyServer(function(input, output) {
   
   
-  #----------------------define datasetInput-----------------------
+  #----------------------define datasetInput and variable labels-----------------------
   datasetInput <- reactive({
     tmp <- census_combined[ , c("NAME", "Year", "Geography_Type", "variable",
                                 as.character(input$variablex), 
@@ -29,6 +30,11 @@ shinyServer(function(input, output) {
                     variable == input$Variable)
     tmp$NAME <- with(tmp, factor(NAME, levels=NAME[order(x)]))
     return(tmp)
+  })
+  
+  labels <- reactive({
+    c(variables[variables$name==input$Variable, "label"],
+    variables[variables$name==input$Variable, "label"])
   })
   
   #--------------------Define scatter plot-----------------------------
@@ -50,16 +56,16 @@ shinyServer(function(input, output) {
     } else{
       ExtraCoords <- NULL
     } 
-    
+    cat(labels())
       p <- ggplot(datasetInput(), aes(x=x, y=y, size=size, colour=colour, label=NAME)) +
               ExtraLine1 + 
               ExtraLine2 +
               geom_text(family="Comic Sans MS") +
-              scale_x_continuous(input$variablex, label=dollar) +
-              scale_y_continuous(input$variabley, label=dollar) +
+              scale_x_continuous(input$variablex, label=get(labels()[1])) +
+              scale_y_continuous(input$variabley, label=get(labels()[2])) +
               scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
-                                    label=dollar) +
-              scale_size_continuous(input$variabley, label=dollar) +
+                                    label=get(labels()[1])) +
+              scale_size_continuous(input$variabley, label=get(labels()[2])) +
               theme_grey(base_family=MyFont)  +
               ExtraCoords +
               guides(colour = guide_legend(order = 2), 
@@ -77,7 +83,7 @@ shinyServer(function(input, output) {
       geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
       labs(y="") +
       scale_x_continuous(input$variablex, label=dollar) +
-      scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), label=dollar) +
+      scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), label=get("dollar")) +
       scale_size_continuous(input$variablex, label=dollar) +
       theme_grey(base_family=MyFont) +
       theme(legend.position="none")

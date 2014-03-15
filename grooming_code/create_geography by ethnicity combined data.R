@@ -6,8 +6,8 @@ source("grooming_code/add year variable to tables from census library.R")
 
 combined_cast_tabs <- list()
 
-#================create a range of combined variables
-
+#================create a range of combined variables======================
+# This section of code smells - it's repetitive.  There's probably a way to refactor it.
 
 #-----------2 variables from Income_T4_all---------------
 Income_T4_all <- rbind(C01Income_T4, C06Income_T4, Cincome_T4)
@@ -52,6 +52,29 @@ combined_cast_tabs[[4]] <- dcast(Rental_T2_all, Geography_Type + Geography + Yea
                                  value.var = target)
 combined_cast_tabs[[4]]$variable <- target
 
+#---------------------------2 from Work_T3 on unemployed---------------
+
+Unempl_T3_all <- rbind(C01Work_T3, C06Work_T3, CWork_T3)
+
+
+Unempl_T3_all$Ethnicity <- rename.levels(Unempl_T3_all$Ethnicity, orig="Mäori", new="Maori")
+
+
+
+target <-"Unemployed"
+combined_cast_tabs[[5]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[5]]$variable <- target
+
+target <- "Unemployment_Rate_Percent"
+combined_cast_tabs[[6]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[6]]$variable <- target
+
+
+
 #==============processing of census_combined dataset====================
 
 combined_cast_tabs2 <- do.call("rbind", combined_cast_tabs)
@@ -75,7 +98,16 @@ census_combined$variable <- factor(gsub("_", " ", census_combined$variable, fixe
 
 ethnicities <- names(census_combined)[ !names(census_combined) 
                                        %in% c("NAME", "Year", "variable", "Geography_Type")]
-variables <- as.character(unique(census_combined$variable))
+variables <- data.frame(name=unique(census_combined$variable))
+variables$name <- as.character(variables$name)
+variables$label <- "comma"                        
+variables$label[grep("ercent", variables$name)] <- "percent"
+variables$label[grep("ollars", variables$name)] <- "dollar"
+
+census_combined[census_combined$variable %in% variables$name[variables$label =="percent"] , ethnicities] <-
+  census_combined[census_combined$variable %in% variables$name[variables$label =="percent"] , ethnicities] / 100
+  
+
 save(census_combined, file = "shiny/census_combined.rda")
 save(ethnicities, file="shiny/ethnicities.rda")
 save(variables, file="shiny/variables.rda")
