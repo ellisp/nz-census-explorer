@@ -1,4 +1,5 @@
 #=============preliminary material=============
+rm(list=ls())
 library(census2013)
 source("grooming_code/add year variable to tables from census library.R")
 
@@ -59,8 +60,6 @@ Unempl_T3_all <- rbind(C01Work_T3, C06Work_T3, CWork_T3)
 
 Unempl_T3_all$Ethnicity <- rename.levels(Unempl_T3_all$Ethnicity, orig="Mäori", new="Maori")
 
-
-
 target <-"Unemployed"
 combined_cast_tabs[[5]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Year ~ Ethnicity, 
                                  function(x){mean(x, na.rm=TRUE)}, 
@@ -72,6 +71,34 @@ combined_cast_tabs[[6]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Yea
                                  function(x){mean(x, na.rm=TRUE)}, 
                                  value.var = target)
 combined_cast_tabs[[6]]$variable <- target
+
+
+#---------------------------2 from Education_T1---------------
+
+Educ_T1_all <- rbind(C01Education_T1, C06Education_T1, CEducation_T1)
+
+Educ_T1_all$Ethnicity <- rename.levels(Educ_T1_all$Ethnicity, orig="Mäori", new="Maori")
+Educ_T1_all <- Educ_T1_all[Educ_T1_all$Age_Group == "Total", ]
+
+tmp <- ddply(Educ_T1_all, .(Geography_Type, Geography, Year, Ethnicity), summarise, 
+             Percent_with_no_education = sum(Total_People[Level_of_education == "None"]) / 
+               sum(Total_People[Level_of_education == "Total"]) * 100,
+             Percent_with_higher_education = sum(Total_People[Level_of_education == "Level 7/Bachelors and above"]) / 
+               sum(Total_People[Level_of_education == "Total"]) * 100
+             )
+
+target <- "Percent_with_no_education"
+combined_cast_tabs[[7]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[7]]$variable <- target
+
+target <- "Percent_with_higher_education"
+combined_cast_tabs[[8]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[8]]$variable <- target
+
 
 
 

@@ -9,7 +9,7 @@ load("variables.rda")
 shinyUI(pageWithSidebar(
   
     # Application title
-  headerPanel("New Zealand median houshold income by ethnicity and district"),
+  headerPanel("New Zealand census data by ethnicity and district"),
   
   #===============================Draw side panel================
   sidebarPanel(
@@ -33,7 +33,7 @@ shinyUI(pageWithSidebar(
     #-----------------------conditional options------------------------
     conditionalPanel(
       condition = "input.theTabs != 'Barchart'",
-      selectInput("variabley", "Vertical axis and size:",
+      selectInput("variabley", "Vertical axis:",
                 choices=as.list(ethnicities),
                 selected="European")
       ), 
@@ -48,18 +48,20 @@ shinyUI(pageWithSidebar(
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",
     
-      checkboxInput("EqualCoords", "Force both scales to be equal?", TRUE),
+      checkboxInput("EqualCoords", "Force both scales to be equal", FALSE),
       checkboxInput("equality", "Show equality line", TRUE),
       checkboxInput("regression", "Show regression line", FALSE)    
-    )    
+    ), 
+    checkboxInput("logs", "Logarithmic scale", FALSE)
     ),
   
   #===================Draw main panel================
   mainPanel(
     tabsetPanel(id="theTabs",
-                tabPanel("Scatter plot", plotOutput("motion", height="700px")), 
-                tabPanel("Barchart", plotOutput("bar", height="700px")),
-                tabPanel("Data table", dataTableOutput("Data"))
+                tabPanel("Compare two ethnicities - plot", value="Scatter plot", plotOutput("motion", height="700px")), 
+                tabPanel("Compare two ethnicities - table", value="Data table", dataTableOutput("Data")),
+                tabPanel("One ethnicity - plot", value="Barchart", plotOutput("bar", height="700px"))
+                
                 
     )
   ) 

@@ -21,10 +21,8 @@ shinyServer(function(input, output) {
   datasetInput <- reactive({
     tmp <- census_combined[ , c("NAME", "Year", "Geography_Type", "variable",
                                 as.character(input$variablex), 
-                                as.character(input$variabley), 
-                                as.character(input$variablex),
                                 as.character(input$variabley))]
-    names(tmp) <- c("NAME", "Year", "Geography_Type", "variable", "x", "y", "colour", "size")
+    names(tmp) <- c("NAME", "Year", "Geography_Type", "variable", "x", "y")
     tmp <- subset(tmp, Year==input$Year & 
                     Geography_Type == input$GeoType &
                     variable == input$Variable)
@@ -35,6 +33,14 @@ shinyServer(function(input, output) {
   labels <- reactive({
     c(variables[variables$name==input$Variable, "label"],
     variables[variables$name==input$Variable, "label"])
+  })
+  
+  Trans <- reactive({
+    if(input$logs){
+      "log10"
+    } else {
+      "identity"
+    }
   })
   
   #--------------------Define scatter plot-----------------------------
@@ -56,20 +62,18 @@ shinyServer(function(input, output) {
     } else{
       ExtraCoords <- NULL
     } 
-    cat(labels())
-      p <- ggplot(datasetInput(), aes(x=x, y=y, size=size, colour=colour, label=NAME)) +
+    
+      p <- ggplot(datasetInput(), aes(x=x, y=y, colour=x, label=NAME)) +
               ExtraLine1 + 
               ExtraLine2 +
               geom_text(family="Comic Sans MS") +
-              scale_x_continuous(input$variablex, label=get(labels()[1])) +
-              scale_y_continuous(input$variabley, label=get(labels()[2])) +
+              scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans()) +
+              scale_y_continuous(paste0(input$variabley, "\n"), label=get(labels()[2]), trans=Trans()) +
               scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
-                                    label=get(labels()[1])) +
-              scale_size_continuous(input$variabley, label=get(labels()[2])) +
+                                    label=get(labels()[1]), trans=Trans()) +
               theme_grey(base_family=MyFont)  +
               ExtraCoords +
-              guides(colour = guide_legend(order = 2), 
-                  size = guide_legend(order = 1))
+              ggtitle(input$Variable)
                 
       print(p)
   })
@@ -82,11 +86,13 @@ shinyServer(function(input, output) {
       geom_point(aes(size=x)) +
       geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
       labs(y="") +
-      scale_x_continuous(input$variablex, label=dollar) +
-      scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), label=get("dollar")) +
-      scale_size_continuous(input$variablex, label=dollar) +
+      scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans()) +
+      scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
+                            label=get(labels()[1]), trans=Trans()) +
+      scale_size_continuous(input$variablex, label=get(labels()[1]), trans=Trans()) +
       theme_grey(base_family=MyFont) +
-      theme(legend.position="none")
+      theme(legend.position="none") +
+      ggtitle(input$Variable)
       
     
     print(p)
