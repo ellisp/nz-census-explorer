@@ -1,3 +1,4 @@
+#=================header material==========================
 library(shiny)
 library(election2011)
 library(RColorBrewer)
@@ -6,8 +7,11 @@ library(extrafont)
 MyFont <- "Verdana"    
 load("IncomeTA_median.rda")
 
-# Define server logic required to plot various variables against mpg
+#===================begin shinyServer()===============================
 shinyServer(function(input, output) {
+  
+  
+  #----------------------define datasetInput-----------------------
   datasetInput <- reactive({
     tmp <- IncomeTA_median[ , c("NAME", "Year",
                                 as.character(input$variablex), 
@@ -20,7 +24,8 @@ shinyServer(function(input, output) {
     tmp$TA <- with(tmp, factor(TA, levels=TA[order(x)]))
     return(tmp)
   })
-    
+  
+  #--------------------Define scatter plot-----------------------------
   output$motion <- renderPlot({
     if(input$regression){
       ExtraLine1 <- geom_smooth(method="lm")
@@ -54,6 +59,8 @@ shinyServer(function(input, output) {
       print(p)
   })
   
+  
+  #-------------------Define "bar" plot ------------------
   output$bar <- renderPlot({
     
     p <- ggplot(datasetInput(), aes(y=TA, x=x, colour=x)) +
@@ -68,6 +75,16 @@ shinyServer(function(input, output) {
       
     
     print(p)
+  })
+  
+  #-------------------Define data table----------------------
+  
+  output$Data <- renderDataTable({
+    tmp <- datasetInput()[ , c("TA", "Year", "x", "y")]
+    tmp$x <- format(tmp$x, big.mark=",")
+    tmp$y <- format(tmp$y, big.mark=",")
+    names(tmp)[3:4] <- c(input$variablex, input$variabley)
+    tmp
   })
   
 

@@ -29,25 +29,36 @@ shinyUI(pageWithSidebar(
                 min = 0, max = 200000, value = c(20000,135000))
     ),
     
+    
     selectInput("variablex", "Horizontal axis and colour:",
-                choices=as.list(ethnicities),
-                selected="Maori"), 
+                  choices=as.list(ethnicities),
+                  selected="Maori"), 
     
-    sliderInput("xRange", "Horizontal axis range:",
-                min = 0, max = 200000, value = c(20000,135000)),
+    conditionalPanel(
+      condition = "input.theTabs != 'Data table'",
       
-     br(),
-            
-    checkboxInput("equality", "Show equality line", TRUE),
+      sliderInput("xRange", "Horizontal axis range:",
+                  min = 0, max = 200000, value = c(20000,135000)),
+        
+       br()
+    ),        
     
-    checkboxInput("regression", "Show regression line", FALSE)    
     
+    conditionalPanel(
+      condition = "input.theTabs === 'Scatter plot'",
+    
+      checkboxInput("equality", "Show equality line", TRUE),
+      
+      checkboxInput("regression", "Show regression line", FALSE)    
+    )    
     ),
     
   mainPanel(
     tabsetPanel(id="theTabs",
-      tabPanel("Scatter plot", plotOutput("motion", height="700px")), 
-      tabPanel("Barchart", plotOutput("bar", height="700px"))
+                tabPanel("Scatter plot", plotOutput("motion", height="700px")), 
+                tabPanel("Barchart", plotOutput("bar", height="700px")),
+                tabPanel("Data table", dataTableOutput("Data"))
+                
     )
   ) 
   
