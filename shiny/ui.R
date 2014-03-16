@@ -19,7 +19,7 @@ shinyUI(pageWithSidebar(
     
     #----------------------options that apply to all-------------------------
     h4("Basic options"),
-    radioButtons("Year", "Census year:",
+    selectInput("Year", "Census year:",
                  c(2013, 2006, 2001)),
     
     selectInput("GeoType", "Geographical area type:",
@@ -29,17 +29,7 @@ shinyUI(pageWithSidebar(
     selectInput("Variable", "Census variable:",
                 choices=as.list(variables$name),
                 selected=variables$name[1]),
-    conditionalPanel(
-      condition = "input.theTabs != 'Data table'",
-      checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE)
-      ),
-    conditionalPanel(
-      condition = "input.Variable != 'Proportion with no education' &&
-                    input.Variable != 'Proportion with higher education' &&
-                    input.Variable != 'Unemployment Rate Percent' &&
-                    input.theTabs != 'Data table'" ,
-      checkboxInput("logs", "Logarithmic scale", FALSE)
-    ),
+    
     
     
     #-----------------------conditional options------------------------
@@ -56,12 +46,25 @@ shinyUI(pageWithSidebar(
                   choices=as.list(ethnicities),
                   selected="Maori"), 
     
+    h4("Plot options to help you make comparisons"),
+    conditionalPanel(
+      condition = "input.theTabs != 'Data table'",
+      checkboxInput("EqualCoords", "Force scales for all plots with this variable to be the same", TRUE)
+    ),
+    conditionalPanel(
+      condition = "input.Variable != 'Proportion with no education' &&
+                    input.Variable != 'Proportion with higher education' &&
+                    input.Variable != 'Unemployment Rate Percent' &&
+                    input.theTabs != 'Data table'" ,
+      checkboxInput("logs", "Logarithmic scale", FALSE)
+    ),
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",
-      h4("Special options for scatter plots"),
+      h5("Special options for scatter plots"),
       checkboxInput("ForcedZero", "Force both axes to start at zero and be equally spaced", TRUE),
       checkboxInput("equality", "Show equality line", TRUE),
-      checkboxInput("regression", "Show regression line", FALSE)    
+      checkboxInput("regression", "Show regression line", FALSE),
+      sliderInput("TextSize", "Size of the names of areas:", 1, 10, 5)
     )
     
     ),

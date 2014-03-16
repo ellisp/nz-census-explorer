@@ -51,7 +51,7 @@ shinyServer(function(input, output) {
         rv[1] <- rv[2] / 100 # otherwise it is zero and crashes the programme
       }
     } else {
-      if(input$ForcedZero){
+      if(input$ForcedZero & input$theTabs != "Barchart"){
         rv[1] <- 0
         rv[2] <- max(c(datasetInput()$x, datasetInput()$y), na.rm=TRUE) * 1.05
       }
@@ -84,7 +84,7 @@ shinyServer(function(input, output) {
       p1 <- ggplot(datasetInput(), aes(x=x, y=y, colour=x, label=NAME)) +
               ExtraLine1 + 
               ExtraLine2 +
-              geom_text(family="Comic Sans MS") +
+              geom_text(family="Comic Sans MS", size=input$TextSize) +
               scale_x_continuous(paste0("\n", input$variablex), 
                                  label=get(labels()[1]), trans=Trans(),
                                  limits=range_variable()) +

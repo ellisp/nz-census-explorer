@@ -14,7 +14,7 @@ combined_cast_tabs <- list()
 #================create a range of combined variables======================
 # This section of code smells - it's repetitive.  There's probably a way to refactor it.
 
-#-----------2 variables from Income_T4_all---------------
+#-----------3 variables from Income_T4_all---------------
 Income_T4_all <- rbind(C01Income_T4, C06Income_T4, Cincome_T4)
 
 Income_T4_all$Ethnicity <- rename.levels(Income_T4_all$Ethnicity, 
@@ -26,17 +26,22 @@ combined_cast_tabs[[1]] <- dcast(Income_T4_all, Geography_Type + Geography + Yea
                          function(x){mean(x, na.rm=TRUE)}, 
                          value.var = target)
 combined_cast_tabs[[1]]$variable <- target
-names(combined_cast_tabs[[1]])[names(combined_cast_tabs[[1]])==
-                                 "Total Responding with at least one ethnicity"] <-"Total responding with at least one ethnicity"
-  
 
 target <- "Total_People"
 combined_cast_tabs[[2]] <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethnicity, 
                                  function(x){mean(x, na.rm=TRUE)}, 
                                  value.var = target)
 combined_cast_tabs[[2]]$variable <- target
-names(combined_cast_tabs[[2]])[names(combined_cast_tabs[[2]])==
-                                 "Total Responding with at least one ethnicity"] <-"Total responding with at least one ethnicity"
+
+
+prop_people <- ddply(Income_T4_all, .(Geography, Year, Geography_Type), mutate,
+      Proportion_of_people_in_area = Total_People / Total_People[Ethnicity == "Total People"] * 100)
+
+target <- "Proportion_of_people_in_area"
+combined_cast_tabs[[3]] <- dcast(prop_people, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[3]]$variable <- target
 
 
 #--------------------2 from the Dwell_HomeT2B-------------------------------
@@ -51,16 +56,16 @@ Rental_T2_all$Ethnicity <- rename.levels(Rental_T2_all$Ethnicity,
 
 
 target <-"Median_Rent_Dollars"
-combined_cast_tabs[[3]] <- dcast(Rental_T2_all, Geography_Type + Geography + Year ~ Ethnicity, 
-                                 function(x){mean(x, na.rm=TRUE)}, 
-                                 value.var = target)
-combined_cast_tabs[[3]]$variable <- target
-
-target <- "Total_Rented_Private_Occupied_Dwellings"
 combined_cast_tabs[[4]] <- dcast(Rental_T2_all, Geography_Type + Geography + Year ~ Ethnicity, 
                                  function(x){mean(x, na.rm=TRUE)}, 
                                  value.var = target)
 combined_cast_tabs[[4]]$variable <- target
+
+target <- "Total_Rented_Private_Occupied_Dwellings"
+combined_cast_tabs[[5]] <- dcast(Rental_T2_all, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[5]]$variable <- target
 
 #---------------------------2 from Work_T3 on unemployed---------------
 
@@ -72,16 +77,16 @@ Unempl_T3_all$Ethnicity <- rename.levels(Unempl_T3_all$Ethnicity,
                                          new=c("Maori", "Total responding with at least one ethnicity"))
 
 target <-"Unemployed"
-combined_cast_tabs[[5]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Year ~ Ethnicity, 
-                                 function(x){mean(x, na.rm=TRUE)}, 
-                                 value.var = target)
-combined_cast_tabs[[5]]$variable <- target
-
-target <- "Unemployment_Rate_Percent"
 combined_cast_tabs[[6]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Year ~ Ethnicity, 
                                  function(x){mean(x, na.rm=TRUE)}, 
                                  value.var = target)
 combined_cast_tabs[[6]]$variable <- target
+
+target <- "Unemployment_Rate_Percent"
+combined_cast_tabs[[7]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[7]]$variable <- target
 
 
 #---------------------------2 from Education_T1---------------
@@ -102,16 +107,16 @@ tmp <- ddply(Educ_T1_all, .(Geography_Type, Geography, Year, Ethnicity), summari
              )
 
 target <- "Proportion_with_no_education"
-combined_cast_tabs[[7]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnicity, 
-                                 function(x){mean(x, na.rm=TRUE)}, 
-                                 value.var = target)
-combined_cast_tabs[[7]]$variable <- target
-
-target <- "Proportion_with_higher_education"
 combined_cast_tabs[[8]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnicity, 
                                  function(x){mean(x, na.rm=TRUE)}, 
                                  value.var = target)
 combined_cast_tabs[[8]]$variable <- target
+
+target <- "Proportion_with_higher_education"
+combined_cast_tabs[[9]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnicity, 
+                                 function(x){mean(x, na.rm=TRUE)}, 
+                                 value.var = target)
+combined_cast_tabs[[9]]$variable <- target
 
 lapply(combined_cast_tabs, names)
 
@@ -144,6 +149,8 @@ names(census_combined)[names(census_combined) == "Total People"] <- "All people 
 
 
 
+#-------------------------
+
 
 ethnicities <- names(census_combined)[ !names(census_combined) 
                                        %in% c("NAME", "Year", "variable", "Geography_Type")]
@@ -154,7 +161,8 @@ variables$label[grep("ercent", variables$name)] <- "percent"
 variables$label[grep("roportion", variables$name)] <- "percent"
 variables$label[grep("ollars", variables$name)] <- "dollar"
 
-
+levels(census_combined$variable) <- gsub(" Dollars", "", levels(census_combined$variable))
+variables$name <- gsub(" Dollars", "", variables$name)
 
 
 census_combined[census_combined$variable %in% variables$name[variables$label =="percent"] , ethnicities] <-
