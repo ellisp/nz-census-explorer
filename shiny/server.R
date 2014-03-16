@@ -101,7 +101,7 @@ shinyServer(function(input, output) {
         scale_color_gradientn(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), colours=c("red", "grey50", "blue"), 
                               label=get(labels()[1]), trans=Trans(),
                               limits=range_variable()) +
-        theme_grey(base_family=MyFont)  +
+        theme_grey(11, base_family=MyFont)  +
         
         ggtitle(input$Variable) +
         theme(legend.title.align=0.5)    
@@ -111,6 +111,17 @@ shinyServer(function(input, output) {
   output$motion <- renderPlot({              
       print(p1())
   })
+  
+  output$download_p1 <- downloadHandler(
+    filename = paste(input$Variable, "for", input$variablex, "and", input$variabley, 
+                    "by", input$GeoType, "Census", input$Year, Sys.Date(),  "scatterplot.png"),
+    content = function(file) {
+      res <- 600
+      png(file, 10 * res, 8 * res, res=res)
+        print(p1())
+      dev.off()
+      
+    })
   
   #-------------------Define "bar" plot ------------------
     p2 <- reactive({
@@ -125,7 +136,7 @@ shinyServer(function(input, output) {
                               limits=range_variable()) +
         scale_size_continuous(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), label=get(labels()[1]), trans=Trans(),
                               limits=range_variable()) +
-        theme_grey(base_family=MyFont) +
+        theme_grey(11, base_family=MyFont) +
         guides(colour = guide_legend(order = 2, reverse=TRUE), size = guide_legend(order = 1, reverse=TRUE)) +
         ggtitle(input$Variable) +
         theme(legend.title.align=0.5)  
@@ -134,6 +145,16 @@ shinyServer(function(input, output) {
   output$bar <- renderPlot({  
     print(p2())
   })
+  
+  output$download_p2 <- downloadHandler(
+    filename = paste(input$Variable, "for", input$variablex, "by", input$GeoType, "Census", input$Year, Sys.Date(),  "dotplot.png"),
+    content = function(file) {
+      res <- 600
+      png(file, 10.5 * res, 8.5 * res, res=res)
+      print(p2())
+      dev.off()
+      
+    })
   
   #-------------------Define data table----------------------
   

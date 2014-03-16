@@ -72,13 +72,15 @@ shinyUI(pageWithSidebar(
   #===================Draw main panel================
   mainPanel(
     tabsetPanel(id="theTabs",
-                tabPanel("Compare two ethnicities - plot", value="Scatter plot", plotOutput("motion", height="700px")), 
+                tabPanel("Compare two ethnicities - plot", value="Scatter plot", 
+                         plotOutput("motion", height="700px"),
+                         downloadButton("download_p1", "Save plot as png")), 
                 tabPanel("Compare two ethnicities - table", value="Data table", dataTableOutput("Data")),
-                tabPanel("One ethnicity - plot", value="Barchart", plotOutput("bar", height="700px"))
-                
-                
+                tabPanel("One ethnicity - plot", value="Barchart", 
+                         plotOutput("bar", height="700px"),
+                         downloadButton("download_p2", "Save plot as png")))
+          
     )
   ) 
   
-  )
 )
