@@ -14,9 +14,11 @@ shinyUI(pageWithSidebar(
   #===============================Draw side panel================
   sidebarPanel(
     
-    h3('Data options:'),
+    h3('Data choices'),
+    
     
     #----------------------options that apply to all-------------------------
+    h4("Basic options"),
     radioButtons("Year", "Census year:",
                  c(2013, 2006, 2001)),
     
@@ -31,9 +33,17 @@ shinyUI(pageWithSidebar(
       condition = "input.theTabs != 'Data table'",
       checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE)
       ),
-    HTML("<hr>"),
+    conditionalPanel(
+      condition = "input.Variable != 'Proportion with no education' &&
+                    input.Variable != 'Proportion with higher education' &&
+                    input.Variable != 'Unemployment Rate Percent' &&
+                    input.theTabs != 'Data table'" ,
+      checkboxInput("logs", "Logarithmic scale", FALSE)
+    ),
+    
     
     #-----------------------conditional options------------------------
+    h4("Choice of ethnicities and how they are shown"),
     conditionalPanel(
       condition = "input.theTabs != 'Barchart'",
       selectInput("variabley", "Vertical axis:",
@@ -46,22 +56,10 @@ shinyUI(pageWithSidebar(
                   choices=as.list(ethnicities),
                   selected="Maori"), 
     
-     
-    
-    
-    
-    conditionalPanel(
-      condition = "input.Variable != 'Proportion with no education' &&
-                    input.Variable != 'Proportion with higher education' &&
-                    input.Variable != 'Unemployment Rate Percent' &&
-                    input.theTabs != 'Data table'" ,
-      checkboxInput("logs", "Logarithmic scale", FALSE)
-      ),
-    
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",
-    
-      
+      h4("Special options for scatter plots"),
+      checkboxInput("ForcedZero", "Force both axes to start at zero and be equally spaced", TRUE),
       checkboxInput("equality", "Show equality line", TRUE),
       checkboxInput("regression", "Show regression line", FALSE)    
     )

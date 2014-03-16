@@ -44,17 +44,20 @@ shinyServer(function(input, output) {
   })
   
   range_variable <- reactive({
+    rv <- NULL
     if(input$EqualCoords){
       rv <- c(variables[variables$name == input$Variable, "Min"], variables[variables$name == input$Variable, "Max"])
       if(input$logs){
         rv[1] <- rv[2] / 100 # otherwise it is zero and crashes the programme
       }
-    } else{
-      rv <- NULL
-    }
-      return(rv)
+    } else {
+      if(input$ForcedZero){
+        rv[1] <- 0
+        rv[2] <- max(c(datasetInput()$x, datasetInput()$y), na.rm=TRUE) * 1.05
+      }
+    } 
+    return(rv)
   })
-  
   
   
   #--------------------Define scatter plot-----------------------------
@@ -72,13 +75,13 @@ shinyServer(function(input, output) {
       ExtraLine2 <- NULL
     } 
     
-    if(input$EqualCoords){
+    if(input$EqualCoords | input$ForcedZero){
       ExtraCoords <- coord_equal() 
     } else{
       ExtraCoords <- NULL
     } 
     
-      p <- ggplot(datasetInput(), aes(x=x, y=y, colour=x, label=NAME)) +
+      p1 <- ggplot(datasetInput(), aes(x=x, y=y, colour=x, label=NAME)) +
               ExtraLine1 + 
               ExtraLine2 +
               geom_text(family="Comic Sans MS") +
@@ -88,21 +91,22 @@ shinyServer(function(input, output) {
               scale_y_continuous(paste0(input$variabley, "\n"), 
                                  label=get(labels()[2]), trans=Trans(),
                                  limits=range_variable()) +
-              scale_color_gradientn(wrap(input$variablex, 15), colours=c("red", "grey50", "blue"), 
+              scale_color_gradientn(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), colours=c("red", "grey50", "blue"), 
                                     label=get(labels()[1]), trans=Trans(),
                                     limits=range_variable()) +
               theme_grey(base_family=MyFont)  +
               ExtraCoords +
-              ggtitle(input$Variable)
+              ggtitle(input$Variable) +
+              theme(legend.title.align=0.5)
                 
-      print(p)
+      print(p1)
   })
   
   
   #-------------------Define "bar" plot ------------------
   output$bar <- renderPlot({
     
-    p <- ggplot(datasetInput(), aes(y=NAME, x=x, colour=x)) +
+    p2 <- ggplot(datasetInput(), aes(y=NAME, x=x, colour=x)) +
       geom_point(aes(size=x)) +
       geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
       labs(y="") +
@@ -111,14 +115,15 @@ shinyServer(function(input, output) {
       scale_color_gradientn("", colours=c("red", "grey50", "blue"), 
                             label=get(labels()[1]), trans=Trans(),
                             limits=range_variable()) +
-      scale_size_continuous(wrap(input$variablex, 15), label=get(labels()[1]), trans=Trans(),
+      scale_size_continuous(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), label=get(labels()[1]), trans=Trans(),
                             limits=range_variable()) +
       theme_grey(base_family=MyFont) +
       guides(colour = guide_legend(order = 2, reverse=TRUE), size = guide_legend(order = 1, reverse=TRUE)) +
-      ggtitle(input$Variable)
+      ggtitle(input$Variable) +
+      theme(legend.title.align=0.5)
       
     
-    print(p)
+    print(p2)
   })
   
   #-------------------Define data table----------------------
