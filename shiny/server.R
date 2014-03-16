@@ -17,7 +17,7 @@ load("variables.rda")
 shinyServer(function(input, output) {
   
   
-  #----------------------define datasetInput and variable labels-----------------------
+  #----------------------define datasetInput-----------------------
   datasetInput <- reactive({
     tmp <- census_combined[ , c("NAME", "Year", "Geography_Type", "variable",
                                 as.character(input$variablex), 
@@ -30,6 +30,7 @@ shinyServer(function(input, output) {
     return(tmp)
   })
   
+  #---------------------define common variables for labels, scales etc
   labels <- reactive({
     c(variables[variables$name==input$Variable, "label"],
     variables[variables$name==input$Variable, "label"])
@@ -59,71 +60,79 @@ shinyServer(function(input, output) {
     return(rv)
   })
   
-  
-  #--------------------Define scatter plot-----------------------------
-  output$motion <- renderPlot({
+  #--------------------Define reactive variabls used just for scatter plot-----------------------------
     
+  ExtraLine1 <- reactive({
     if(input$regression){
-      ExtraLine1 <- geom_smooth(method="lm")
+      geom_smooth(method="lm")
     } else{
-      ExtraLine1 <- NULL
-    }
+      NULL
+    }    
+    })
     
+  ExtraLine2 <- reactive({
     if(input$equality){
-      ExtraLine2 <- geom_abline(slope=1, xintercept=0, color="white") 
+      geom_abline(slope=1, xintercept=0, color="white") 
     } else{
-      ExtraLine2 <- NULL
-    } 
-    
+      NULL
+    }
+  })
+     
+  ExtraCoords <- reactive({
     if(input$EqualCoords | input$ForcedZero){
-      ExtraCoords <- coord_equal() 
+      coord_equal() 
     } else{
-      ExtraCoords <- NULL
-    } 
-    
-      p1 <- ggplot(datasetInput(), aes(x=x, y=y, colour=x, label=NAME)) +
-              ExtraLine1 + 
-              ExtraLine2 +
-              geom_text(family="Comic Sans MS", size=input$TextSize) +
-              scale_x_continuous(paste0("\n", input$variablex), 
-                                 label=get(labels()[1]), trans=Trans(),
-                                 limits=range_variable()) +
-              scale_y_continuous(paste0(input$variabley, "\n"), 
-                                 label=get(labels()[2]), trans=Trans(),
-                                 limits=range_variable()) +
-              scale_color_gradientn(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), colours=c("red", "grey50", "blue"), 
-                                    label=get(labels()[1]), trans=Trans(),
-                                    limits=range_variable()) +
-              theme_grey(base_family=MyFont)  +
-              ExtraCoords +
-              ggtitle(input$Variable) +
-              theme(legend.title.align=0.5)
-                
-      print(p1)
+      NULL
+    }
+  })
+  #---------------------define the scatter plot-----------------------         
+    p1 <- reactive({
+      ggplot(datasetInput(), aes(x=x, y=y, colour=x, label=NAME)) +
+        ExtraLine1() + 
+        ExtraLine2() +
+        ExtraCoords() +
+        geom_text(family="Comic Sans MS", size=input$TextSize) +
+        scale_x_continuous(paste0("\n", input$variablex), 
+                           label=get(labels()[1]), trans=Trans(),
+                           limits=range_variable()) +
+        scale_y_continuous(paste0(input$variabley, "\n"), 
+                           label=get(labels()[2]), trans=Trans(),
+                           limits=range_variable()) +
+        scale_color_gradientn(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), colours=c("red", "grey50", "blue"), 
+                              label=get(labels()[1]), trans=Trans(),
+                              limits=range_variable()) +
+        theme_grey(base_family=MyFont)  +
+        
+        ggtitle(input$Variable) +
+        theme(legend.title.align=0.5)    
+      
+    })
+   
+  output$motion <- renderPlot({              
+      print(p1())
   })
   
-  
   #-------------------Define "bar" plot ------------------
-  output$bar <- renderPlot({
-    
-    p2 <- ggplot(datasetInput(), aes(y=NAME, x=x, colour=x)) +
-      geom_point(aes(size=x)) +
-      geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
-      labs(y="") +
-      scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans(),
-                         limits=range_variable()) +
-      scale_color_gradientn("", colours=c("red", "grey50", "blue"), 
-                            label=get(labels()[1]), trans=Trans(),
-                            limits=range_variable()) +
-      scale_size_continuous(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), label=get(labels()[1]), trans=Trans(),
-                            limits=range_variable()) +
-      theme_grey(base_family=MyFont) +
-      guides(colour = guide_legend(order = 2, reverse=TRUE), size = guide_legend(order = 1, reverse=TRUE)) +
-      ggtitle(input$Variable) +
-      theme(legend.title.align=0.5)
-      
-    
-    print(p2)
+    p2 <- reactive({
+      ggplot(datasetInput(), aes(y=NAME, x=x, colour=x)) +
+        geom_point(aes(size=x)) +
+        geom_segment(aes(yend=as.numeric(NAME), y=as.numeric(NAME)), xend=0) +
+        labs(y="") +
+        scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans(),
+                           limits=range_variable()) +
+        scale_color_gradientn("", colours=c("red", "grey50", "blue"), 
+                              label=get(labels()[1]), trans=Trans(),
+                              limits=range_variable()) +
+        scale_size_continuous(wrap(paste(input$variablex, input$Variable, sep="\n"), 15), label=get(labels()[1]), trans=Trans(),
+                              limits=range_variable()) +
+        theme_grey(base_family=MyFont) +
+        guides(colour = guide_legend(order = 2, reverse=TRUE), size = guide_legend(order = 1, reverse=TRUE)) +
+        ggtitle(input$Variable) +
+        theme(legend.title.align=0.5)  
+    })
+       
+  output$bar <- renderPlot({  
+    print(p2())
   })
   
   #-------------------Define data table----------------------
@@ -135,7 +144,4 @@ shinyServer(function(input, output) {
     names(tmp)[3:4] <- c(input$variablex, input$variabley)
     tmp
   })
-  
-
-  
 })
