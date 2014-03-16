@@ -5,13 +5,8 @@ library(RColorBrewer)
 library(extrafont)
 
 MyFont <- "Verdana"    
-load("census_combined.rda")
-load("variables.rda")
-
-# For debugging
-# input <- data.frame(variablex="Maori", variabley="Maori", "GeoType" = "Territorial Authority", Variable = "Total People")
-
-# TODO - fix labels on scales (comma, dollar, percent, etc)
+load("../data/census_combined.rda")
+load("../data/variables.rda")
 
 #===================begin shinyServer()===============================
 shinyServer(function(input, output) {

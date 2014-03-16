@@ -1,7 +1,7 @@
 library(shiny)
 
 
-runApp("shiny")
+runApp("shiny/scatter_and_dot")
 
 # or
-runGitHub("nz-census-explorer", "ellisp", subdir="shiny")
+runGitHub("nz-census-explorer", "ellisp", subdir="shiny/scatter_and_dot")

@@ -2,8 +2,8 @@ library(shiny)
 library(election2011)
 
 
-load("ethnicities.rda")
-load("variables.rda")
+load("../data/ethnicities.rda")
+load("../data/variables.rda")
 
 # Define UI 
 shinyUI(pageWithSidebar(
