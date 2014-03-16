@@ -27,7 +27,10 @@ shinyUI(pageWithSidebar(
     selectInput("Variable", "Census variable:",
                 choices=as.list(variables$name),
                 selected=variables$name[1]),
-    
+    conditionalPanel(
+      condition = "input.theTabs != 'Data table'",
+      checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE)
+      ),
     HTML("<hr>"),
     
     #-----------------------conditional options------------------------
@@ -44,13 +47,14 @@ shinyUI(pageWithSidebar(
                   selected="Maori"), 
     
      
-    checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE),
+    
     
     
     conditionalPanel(
       condition = "input.Variable != 'Proportion with no education' &&
                     input.Variable != 'Proportion with higher education' &&
-                    input.Variable != 'Unemployment Rate Percent'",
+                    input.Variable != 'Unemployment Rate Percent' &&
+                    input.theTabs != 'Data table'" ,
       checkboxInput("logs", "Logarithmic scale", FALSE)
       ),
     

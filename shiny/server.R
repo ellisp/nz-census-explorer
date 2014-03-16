@@ -88,7 +88,7 @@ shinyServer(function(input, output) {
               scale_y_continuous(paste0(input$variabley, "\n"), 
                                  label=get(labels()[2]), trans=Trans(),
                                  limits=range_variable()) +
-              scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
+              scale_color_gradientn(wrap(input$variablex, 15), colours=c("red", "grey50", "blue"), 
                                     label=get(labels()[1]), trans=Trans(),
                                     limits=range_variable()) +
               theme_grey(base_family=MyFont)  +
@@ -108,13 +108,13 @@ shinyServer(function(input, output) {
       labs(y="") +
       scale_x_continuous(paste0("\n", input$variablex), label=get(labels()[1]), trans=Trans(),
                          limits=range_variable()) +
-      scale_color_gradientn(input$variablex, colours=c("red", "grey50", "blue"), 
+      scale_color_gradientn("", colours=c("red", "grey50", "blue"), 
                             label=get(labels()[1]), trans=Trans(),
                             limits=range_variable()) +
-      scale_size_continuous(input$variablex, label=get(labels()[1]), trans=Trans(),
+      scale_size_continuous(wrap(input$variablex, 15), label=get(labels()[1]), trans=Trans(),
                             limits=range_variable()) +
       theme_grey(base_family=MyFont) +
-      theme(legend.position="none") +
+      guides(colour = guide_legend(order = 2, reverse=TRUE), size = guide_legend(order = 1, reverse=TRUE)) +
       ggtitle(input$Variable)
       
     
