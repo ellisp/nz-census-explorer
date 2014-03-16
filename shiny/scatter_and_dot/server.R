@@ -1,7 +1,5 @@
 #=================header material==========================
 library(shiny)
-library(election2011)
-library(RColorBrewer)
 library(extrafont)
 
 MyFont <- "Verdana"    

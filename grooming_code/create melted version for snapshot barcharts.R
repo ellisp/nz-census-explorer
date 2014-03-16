@@ -20,21 +20,11 @@ census_m$value[grep("ercent", census_m$variable)] <- census_m$value[grep("ercent
 
 #-----------------------
 
+TAs <- as.character(unique(subset(census_m, Geography_Type == "Territorial Authority")$NAME))
+Regions <- as.character(unique(subset(census_m, Geography_Type == "Regional Council")$NAME))
 
-reg1 <- "Northland"
-reg2 <- "Auckland"
-GeoType <- "Regional Council"
-ThisYear <- 2013
+#---------------
 
-census2 <- subset(census_m, Year==ThisYear &
-                    NAME %in% c(reg1, reg2) &
-                    Geography_Type == GeoType)
-
-ggplot(census2, aes(x=NAME, fill=Ethnicity, weight=value)) +
-  geom_bar(position="dodge") +
-  facet_wrap(~variable, scales="free_y", ncol=2) +
-  scale_y_continuous("", label=comma) +
-  labs(x="") +
-  theme_bw(base_family=MyFont) +
-  scale_fill_brewer(palette="Set1") +
-  theme(panel.margin = unit(2, "lines"))
+save(census_m, file="shiny/data/census_m.rda")
+save(TAs, file="shiny/data/TAs.rda")
+save(Regions, file="shiny/data/Regions.rda")
