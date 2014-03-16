@@ -45,7 +45,14 @@ shinyUI(pageWithSidebar(
     
      
     checkboxInput("EqualCoords", "Force scales for all plots with this variable to be equal", TRUE),
-    checkboxInput("logs", "Logarithmic scale", FALSE),
+    
+    
+    conditionalPanel(
+      condition = "input.Variable != 'Proportion with no education' &&
+                    input.Variable != 'Proportion with higher education' &&
+                    input.Variable != 'Unemployment Rate Percent'",
+      checkboxInput("logs", "Logarithmic scale", FALSE)
+      ),
     
     conditionalPanel(
       condition = "input.theTabs === 'Scatter plot'",

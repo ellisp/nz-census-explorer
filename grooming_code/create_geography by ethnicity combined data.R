@@ -16,8 +16,10 @@ combined_cast_tabs <- list()
 
 #-----------2 variables from Income_T4_all---------------
 Income_T4_all <- rbind(C01Income_T4, C06Income_T4, Cincome_T4)
-levels(Income_T4_all$Ethnicity)
-Income_T4_all$Ethnicity <- rename.levels(Income_T4_all$Ethnicity, orig="Mäori", new="Maori")
+
+Income_T4_all$Ethnicity <- rename.levels(Income_T4_all$Ethnicity, 
+                                         orig=c("Mäori", "Total responding with at least one ethnic group", "Total Responding with at least one ethnicity"), 
+                                         new=c("Maori", "Total responding with at least one ethnicity", "Total responding with at least one ethnicity"))
 
 target <- "Median_Household_Income_Dollars"
 combined_cast_tabs[[1]] <- dcast(Income_T4_all, Geography_Type + Geography + Year ~ Ethnicity, 
@@ -42,7 +44,9 @@ names(combined_cast_tabs[[2]])[names(combined_cast_tabs[[2]])==
 Rental_T2_all <- rbind(C01Dwell_HomeT2b, C06Dwell_HomeT2b, CDwell_Home_T2b)
 names(Rental_T2_all)[names(Rental_T2_all) == "Ethnicity_of_Reference_Person"] <- "Ethnicity"
 
-Rental_T2_all$Ethnicity <- rename.levels(Rental_T2_all$Ethnicity, orig="Mäori", new="Maori")
+Rental_T2_all$Ethnicity <- rename.levels(Rental_T2_all$Ethnicity, 
+                                         orig=c("Mäori", "Total responding with at least one ethnic group"), 
+                                         new=c("Maori", "Total responding with at least one ethnicity"))
 
 
 
@@ -63,7 +67,9 @@ combined_cast_tabs[[4]]$variable <- target
 Unempl_T3_all <- rbind(C01Work_T3, C06Work_T3, CWork_T3)
 
 
-Unempl_T3_all$Ethnicity <- rename.levels(Unempl_T3_all$Ethnicity, orig="Mäori", new="Maori")
+Unempl_T3_all$Ethnicity <- rename.levels(Unempl_T3_all$Ethnicity, 
+                                         orig=c("Mäori", "Total responding with at least one ethnic group"), 
+                                         new=c("Maori", "Total responding with at least one ethnicity"))
 
 target <-"Unemployed"
 combined_cast_tabs[[5]] <- dcast(Unempl_T3_all, Geography_Type + Geography + Year ~ Ethnicity, 
@@ -81,10 +87,10 @@ combined_cast_tabs[[6]]$variable <- target
 #---------------------------2 from Education_T1---------------
 
 Educ_T1_all <- rbind(C01Education_T1, C06Education_T1, CEducation_T1)
-Educ_T1_all$Ethnicity <- rename.levels(Educ_T1_all$Ethnicity, orig="Mäori", new="Maori")
+Educ_T1_all$Ethnicity <- rename.levels(Educ_T1_all$Ethnicity, 
+                                       orig=c("Mäori", "Total responding with at least one ethnic group"), 
+                                       new=c("Maori", "Total responding with at least one ethnicity"))
 Educ_T1_all <- Educ_T1_all[Educ_T1_all$Age_Group == "Total", ]
-
-levels(Educ_T1_all$Level_of_education)
 
 tmp <- ddply(Educ_T1_all, .(Geography_Type, Geography, Year, Ethnicity), summarise, 
              Proportion_with_no_education = sum(Total_People[Level_of_education == "None"]) / 
@@ -107,8 +113,7 @@ combined_cast_tabs[[8]] <- dcast(tmp, Geography_Type + Geography + Year ~ Ethnic
                                  value.var = target)
 combined_cast_tabs[[8]]$variable <- target
 
-
-
+lapply(combined_cast_tabs, names)
 
 #==============processing of census_combined dataset====================
 
@@ -130,6 +135,15 @@ census_combined$Geography_Type <- rename.levels(census_combined$Geography_Type,
                                                 ne = c("Territorial Authority", "Regional Council"))
 census_combined$NAME <- factor(census_combined$NAME)
 census_combined$variable <- factor(gsub("_", " ", census_combined$variable, fixed=TRUE))
+
+names(census_combined)[names(census_combined) == "Total People"] <- "All people regardless of ethnicity"
+
+
+
+
+
+
+
 
 ethnicities <- names(census_combined)[ !names(census_combined) 
                                        %in% c("NAME", "Year", "variable", "Geography_Type")]
