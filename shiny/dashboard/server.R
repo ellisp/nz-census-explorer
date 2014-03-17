@@ -1,6 +1,9 @@
 #=================header material for nz-census-explorer dashboard Shiny app==========================
 library(shiny)
-library(extrafont)
+require(extrafont)
+library(ggplot2)
+library(scales)
+library(mbie)
 
 MyFont <- "Verdana"    
 load("../data/census_m.rda")

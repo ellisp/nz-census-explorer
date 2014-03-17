@@ -1,6 +1,11 @@
+#==================server.R for the scatter_and_dot Shiny application================
+
 #=================header material==========================
 library(shiny)
-library(extrafont)
+require(extrafont)
+library(ggplot2)
+library(scales)
+library(mbie)
 
 MyFont <- "Verdana"    
 load("../data/census_combined.rda")

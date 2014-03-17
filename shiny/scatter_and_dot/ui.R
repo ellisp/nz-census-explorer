@@ -1,5 +1,7 @@
+#=================client side script for scatter_and_dot Shiny application==============
+
 library(shiny)
-library(election2011)
+
 
 
 load("../data/ethnicities.rda")
